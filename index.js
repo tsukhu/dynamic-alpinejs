@@ -113,6 +113,8 @@ const App2Data = {
   name,
 };
 
+// --- APP3 ---
+
 // Needs the function to be global
 window.fetchUsers = function () {
   return fetch("https://jsonplaceholder.typicode.com/users")
