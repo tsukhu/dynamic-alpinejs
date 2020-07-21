@@ -1,0 +1,16 @@
+{
+  "name": "dynamic-alpinejs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Tarun Kumar Sukhu",
+  "license": "MIT",
+  "devDependencies": {
+    "parcel-bundler": "^1.12.4"
+  },
+  "scripts": {
+    "start": "parcel index.html --global myCustomModule"
+  },
+  "dependencies": {
+    "alpinejs": "^2.5.0"
+  }
+}

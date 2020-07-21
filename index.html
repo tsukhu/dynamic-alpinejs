@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alpine JS API test</title>
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <link
+      href="//cdn.muicss.com/mui-0.10.3/css/mui.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <link
+      href="//cdn.muicss.com/mui-0.10.3/extra/mui-colors.min.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="//cdn.muicss.com/mui-0.10.3/js/mui.min.js"></script>
+  </head>
+  <body>
+    <div class="mui-container-fluid">
+        <button class="mui-btn mui-btn--primary" onclick="myCustomModule.isMountedApp('app1')?myCustomModule.unmountApp('app1'):myCustomModule.mountApp1()">Toggle App1 </button>
+        <button class="mui-btn mui-btn--primary" onclick="myCustomModule.isMountedApp('app2')?myCustomModule.unmountApp('app2'):myCustomModule.mountApp2()">Toggle App2 (x-data)</button>
+        <button class="mui-btn mui-btn--primary" onclick="myCustomModule.isMountedApp('app3')?myCustomModule.unmountApp('app3'):myCustomModule.mountApp3()">Toggle App3 (x-data & x-init)</button>
+    </div>
+    <script src="./index.js"></script>
+  </body>
+</html>
