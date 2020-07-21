@@ -104,17 +104,19 @@ module.exports.mountApp2 = function mountApp2() {
   return mount(id, { template: templateApp2, xData: { open: false } });
 };
 
-const App2Data = {
-  title: "Alpine.js Landing Page",
-  intro:
-    'Implement a simple <code class="text-md text-pink-600">fetch()</code> request to render a list of items using Alpine.js :)',
-  users: [],
-  open: false,
-  name,
-};
+
 
 // --- APP3 ---
 
+const App3Data = {
+    title: "Alpine.js Landing Page",
+    intro:
+      'Implement a simple <code class="text-md text-pink-600">fetch()</code> request to render a list of items using Alpine.js :)',
+    users: [],
+    open: false,
+    name,
+  };
+  
 // Needs the function to be global
 window.fetchUsers = function () {
   return fetch("https://jsonplaceholder.typicode.com/users")
@@ -126,7 +128,7 @@ module.exports.mountApp3 = function mountApp2() {
   const id = "app3";
   return mount(id, {
     template: templateApp3,
-    xData: App2Data,
+    xData: App3Data,
     xInit: "fetchUsers()",
   });
 };
