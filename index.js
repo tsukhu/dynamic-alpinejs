@@ -25,7 +25,7 @@ function mount(id, { template, xData, xInit }) {
   let domEl;
   if (xInit) {
     if (window.hasOwnProperty("xInitFn")) {
-      window.xInitFn = { ...window.xInitFn ,[id]: xInit };
+      window.xInitFn = { ...window.xInitFn, [id]: xInit };
     } else {
       window.xInitFn = { [id]: xInit };
     }
@@ -131,17 +131,19 @@ const App3Data = {
   name,
 };
 
+const myFunc = (id) => {
+    return fetch("https://jsonplaceholder.typicode.com/users")
+      .then((response) => response.json())
+      .then(
+        (data) => (document.querySelector(`#${id}`).__x.$data.users = data)
+      );
+}
+
 module.exports.mountApp3 = function mountApp2() {
   const id = "app3";
   return mount(id, {
     template: templateApp3,
     xData: App3Data,
-    xInit: (id) => {
-      return fetch("https://jsonplaceholder.typicode.com/users")
-        .then((response) => response.json())
-        .then(
-          (data) => (document.querySelector(`#${id}`).__x.$data.users = data)
-        );
-    },
+    xInit: myFunc
   });
 };
