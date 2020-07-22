@@ -132,7 +132,7 @@ function templateApp3() {
     `;
 }
 
-const App3Data = ({ title }) => ({
+const App3Data = ({ title, name }) => ({
   title,
   intro:
     'Implement a simple <code class="text-md text-pink-600">fetch()</code> request to render a list of items using Alpine.js :)',
