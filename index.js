@@ -22,19 +22,28 @@ function getAppMountElement(htmlId, xData, xInit) {
 }
 
 function mount(id, { template, xData, xInit }) {
-  const domEl = getAppMountElement(id, xData, xInit);
+  let domEl;
+  if (xInit) {
+    if (window.hasOwnProperty("xInitFn")) {
+      window.xInitFn = { ...window.xInitFn ,[id]: xInit };
+    } else {
+      window.xInitFn = { [id]: xInit };
+    }
+    domEl = getAppMountElement(id, xData, `xInitFn.${id}('${id}')`);
+  } else domEl = getAppMountElement(id, xData, xInit);
+
   domEl.innerHTML = template();
 }
 
 function templateApp1() {
   return `
-<div class="mui-panel" x-data="{ open: false }">
-    <div class="mui--test-display1"> Test x-show</div>
-    <button class="mui-btn mui-btn--primary" @click="open = !open">Open/Close</button>
-    <div x-show="open" class="mui--text-display4">
-        Hey, I'm open
-    </div>
-</div>
+  <div class="mui-panel" x-data="{ open: false }">
+      <div class="mui--test-display1"> Test x-show</div>
+      <button class="mui-btn mui-btn--primary" @click="open = !open">Open/Close</button>
+      <div x-show="open" class="mui--text-display4">
+          Hey, I'm open
+      </div>
+  </div>
 `;
 }
 
@@ -76,7 +85,7 @@ function templateApp3() {
     `;
 }
 
-// check if the app is mounted 
+// check if the app is mounted
 module.exports.isMountedApp = function isMounted(id) {
   const domEl = document.getElementById(id);
   return domEl && domEl.innerHTML.length > 0;
@@ -84,6 +93,9 @@ module.exports.isMountedApp = function isMounted(id) {
 
 // unmount the app
 module.exports.unmountApp = function unmountApp(id) {
+  if (window.hasOwnProperty("xInitFn")) {
+    delete window.xInitFn[`${id}`];
+  }
   const domEl = document.getElementById(id);
   if (domEl) {
     domEl.remove();
@@ -101,27 +113,22 @@ module.exports.mountApp1 = function mountApp1() {
 
 module.exports.mountApp2 = function mountApp2() {
   const id = "app2";
-  return mount(id, { template: templateApp2, xData: { open: false } });
+  return mount(id, {
+    template: templateApp2,
+    xData: { open: false },
+    xInit: () => console.log("xInit"),
+  });
 };
-
-
 
 // --- APP3 ---
 
 const App3Data = {
-    title: "Alpine.js Landing Page",
-    intro:
-      'Implement a simple <code class="text-md text-pink-600">fetch()</code> request to render a list of items using Alpine.js :)',
-    users: [],
-    open: false,
-    name,
-  };
-  
-// Needs the function to be global
-window.fetchUsers = function () {
-  return fetch("https://jsonplaceholder.typicode.com/users")
-    .then((response) => response.json())
-    .then((data) => (document.querySelector('#app3').__x.$data.users = data));
+  title: "Alpine.js Landing Page",
+  intro:
+    'Implement a simple <code class="text-md text-pink-600">fetch()</code> request to render a list of items using Alpine.js :)',
+  users: [],
+  open: false,
+  name,
 };
 
 module.exports.mountApp3 = function mountApp2() {
@@ -129,6 +136,12 @@ module.exports.mountApp3 = function mountApp2() {
   return mount(id, {
     template: templateApp3,
     xData: App3Data,
-    xInit: "fetchUsers()",
+    xInit: (id) => {
+      return fetch("https://jsonplaceholder.typicode.com/users")
+        .then((response) => response.json())
+        .then(
+          (data) => (document.querySelector(`#${id}`).__x.$data.users = data)
+        );
+    },
   });
 };
