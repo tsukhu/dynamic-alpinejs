@@ -1,13 +1,17 @@
 import "alpinejs";
 
-function getAppMountElement(htmlId, xData, xInit) {
+function getAppMountElement(htmlId, xData, xInit, props) {
   let domElement = document.getElementById(htmlId);
   if (!domElement) {
     domElement = document.createElement("div");
     domElement.id = htmlId;
+    const typeofXData = typeof xData;
+    console.log(typeofXData);
     if (typeof xData !== "undefined" && xData !== null) {
       var att = document.createAttribute("x-data"); // Add x-data attribute
-      att.value = JSON.stringify(xData);
+      if (typeofXData === "function") {
+        att.value = JSON.stringify(xData({...props}));
+      } else att.value = JSON.stringify(xData);
       domElement.setAttributeNode(att);
 
       if (typeof xInit === "string" && xInit !== null) {
@@ -21,19 +25,40 @@ function getAppMountElement(htmlId, xData, xInit) {
   return domElement;
 }
 
-function mount(id, { template, xData, xInit }) {
+function mount({ template, xData, xInit },props) {
   let domEl;
+  const { name } = props;
+  console.log(name);
   if (xInit) {
     if (window.hasOwnProperty("xInitFn")) {
-      window.xInitFn = { ...window.xInitFn, [id]: xInit };
+      window.xInitFn = { ...window.xInitFn, [name]: xInit };
     } else {
-      window.xInitFn = { [id]: xInit };
+      window.xInitFn = { [name]: xInit };
     }
-    domEl = getAppMountElement(id, xData, `xInitFn.${id}('${id}')`);
-  } else domEl = getAppMountElement(id, xData, xInit);
+    domEl = getAppMountElement(name, xData, `xInitFn.${name}('${name}')`, {...props});
+  } else domEl = getAppMountElement(name, xData, xInit, {...props});
 
   domEl.innerHTML = template();
 }
+
+// check if the app is mounted
+module.exports.isMountedApp = function isMounted(id) {
+  const domEl = document.getElementById(id);
+  return domEl && domEl.innerHTML.length > 0;
+};
+
+// unmount the app
+module.exports.unmountApp = function unmountApp(id) {
+  if (window.hasOwnProperty("xInitFn")) {
+    delete window.xInitFn[`${id}`];
+  }
+  const domEl = document.getElementById(id);
+  if (domEl) {
+    domEl.remove();
+  }
+};
+
+// --- APP 1 -----
 
 function templateApp1() {
   return `
@@ -47,6 +72,16 @@ function templateApp1() {
 `;
 }
 
+module.exports.mountApp1 = function mountApp1() {
+  const opts = {
+    template: templateApp1,
+  };
+  const props = { name: "app1" };
+  return mount(opts, props);
+};
+
+// --- APP 2 -----
+
 function templateApp2() {
   return `
   <div class="mui-panel">
@@ -58,6 +93,18 @@ function templateApp2() {
   </div>
   `;
 }
+
+module.exports.mountApp2 = function mountApp2() {
+  const opts = {
+    template: templateApp2,
+    xData: { open: false },
+    xInit: () => console.log("xInit"),
+  };
+  const props = { name: "app2" };
+  return mount(opts, props);
+};
+
+// --- APP3 ---
 
 function templateApp3() {
   return `
@@ -85,51 +132,14 @@ function templateApp3() {
     `;
 }
 
-// check if the app is mounted
-module.exports.isMountedApp = function isMounted(id) {
-  const domEl = document.getElementById(id);
-  return domEl && domEl.innerHTML.length > 0;
-};
-
-// unmount the app
-module.exports.unmountApp = function unmountApp(id) {
-  if (window.hasOwnProperty("xInitFn")) {
-    delete window.xInitFn[`${id}`];
-  }
-  const domEl = document.getElementById(id);
-  if (domEl) {
-    domEl.remove();
-  }
-};
-
-// --- APP 1 -----
-
-module.exports.mountApp1 = function mountApp1() {
-  const id = "app1";
-  return mount(id, { template: templateApp1 });
-};
-
-// --- APP 2 -----
-
-module.exports.mountApp2 = function mountApp2() {
-  const id = "app2";
-  return mount(id, {
-    template: templateApp2,
-    xData: { open: false },
-    xInit: () => console.log("xInit"),
-  });
-};
-
-// --- APP3 ---
-
-const App3Data = {
-  title: "Alpine.js Landing Page",
+const App3Data = ({ title }) => ({
+  title,
   intro:
     'Implement a simple <code class="text-md text-pink-600">fetch()</code> request to render a list of items using Alpine.js :)',
   users: [],
   open: false,
   name,
-};
+});
 
 const myFunc = (id) => {
   return fetch("https://jsonplaceholder.typicode.com/users")
@@ -137,11 +147,12 @@ const myFunc = (id) => {
     .then((data) => (document.querySelector(`#${id}`).__x.$data.users = data));
 };
 
-module.exports.mountApp3 = function mountApp2() {
-  const id = "app3";
-  return mount(id, {
+module.exports.mountApp3 = function mountApp3() {
+  const opts = {
     template: templateApp3,
-    xData: App3Data,
+    xData: (data) => App3Data(data), // pass props to x-data
     xInit: myFunc,
-  });
+  };
+  const props = { name: "app3", title: "Alpine.js Landing Page" };
+  return mount(opts, props);
 };
