@@ -132,18 +132,16 @@ const App3Data = {
 };
 
 const myFunc = (id) => {
-    return fetch("https://jsonplaceholder.typicode.com/users")
-      .then((response) => response.json())
-      .then(
-        (data) => (document.querySelector(`#${id}`).__x.$data.users = data)
-      );
-}
+  return fetch("https://jsonplaceholder.typicode.com/users")
+    .then((response) => response.json())
+    .then((data) => (document.querySelector(`#${id}`).__x.$data.users = data));
+};
 
 module.exports.mountApp3 = function mountApp2() {
   const id = "app3";
   return mount(id, {
     template: templateApp3,
     xData: App3Data,
-    xInit: myFunc
+    xInit: myFunc,
   });
 };
