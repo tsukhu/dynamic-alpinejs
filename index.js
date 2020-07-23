@@ -1,24 +1,35 @@
 import "alpinejs";
 
-function getAppMountElement(htmlId, xData, xInit, props) {
+function wrap(htmlId, domEl) {
+  // get base
   let domElement = document.getElementById(htmlId);
   if (!domElement) {
     domElement = document.createElement("div");
     domElement.id = htmlId;
-    const typeofXData = typeof xData;
-    if (typeof xData !== "undefined" && xData !== null) {
-      const originalData =
-        typeofXData === "function" ? xData({ ...props }) : xData;
-      // merge the opts.xData with the single-spa props
-      const finalData = Object.assign({}, props, originalData);
-      // add x-data attribute
-      domElement.setAttribute("x-data", JSON.stringify(finalData));
-      if (typeof xInit === "string" && xInit !== null) {
-        domElement.setAttribute("x-init", xInit);
-      }
-    }
-    document.body.appendChild(domElement);
   }
+  domElement.appendChild(domEl);
+  document.body.appendChild(domElement);
+}
+
+function getAppMountElement(htmlId, xData, xInit, props) {
+  const { name } = props;
+
+  let domElement = document.createElement("div");
+  domElement.id = `__alpine:${name}`;
+  const typeofXData = typeof xData;
+
+  if (typeof xData !== "undefined" && xData !== null) {
+    const originalData =
+      typeofXData === "function" ? xData({ ...props }) : xData;
+    // merge the opts.xData with the single-spa props
+    const finalData = Object.assign({}, props, originalData);
+    // add x-data attribute
+    domElement.setAttribute("x-data", JSON.stringify(finalData));
+    if (typeof xInit === "string" && xInit !== null) {
+      domElement.setAttribute("x-init", xInit);
+    }
+  }
+
   return domElement;
 }
 
@@ -31,12 +42,13 @@ function mount({ template, xData, xInit }, props) {
     } else {
       window.xInitFn = { [name]: xInit };
     }
-    domEl = getAppMountElement(name, xData, `xInitFn.${name}('${name}')`, {
+    domEl = getAppMountElement(name, xData, `xInitFn.${name}('__alpine:${name}')`, {
       ...props,
     });
   } else domEl = getAppMountElement(name, xData, xInit, { ...props });
 
   domEl.innerHTML = template();
+  wrap(name, domEl);
 }
 
 // check if the app is mounted
@@ -50,7 +62,7 @@ module.exports.unmountApp = function unmountApp(id) {
   if (window.hasOwnProperty("xInitFn")) {
     delete window.xInitFn[`${id}`];
   }
-  const domEl = document.getElementById(id);
+  const domEl = document.getElementById(`__alpine:${id}`);
   if (domEl) {
     domEl.remove();
   }
@@ -173,7 +185,7 @@ const App3Data = ({ title, name }) => ({
 const myFunc = (id) => {
   return fetch("https://jsonplaceholder.typicode.com/users")
     .then((response) => response.json())
-    .then((data) => (document.querySelector(`#${id}`).__x.$data.users = data));
+    .then((data) => (document.getElementById(`${id}`).__x.$data.users = data));
 };
 
 module.exports.mountApp3 = function mountApp3() {

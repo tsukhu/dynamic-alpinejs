@@ -19,9 +19,9 @@
   </head>
   <body>
     <div class="mui-container-fluid">
-        <button class="mui-btn mui-btn--primary" onclick="myCustomModule.isMountedApp('app1')?myCustomModule.unmountApp('app1'):myCustomModule.mountApp1()">Toggle App1 </button>
-        <button class="mui-btn mui-btn--primary" onclick="myCustomModule.isMountedApp('app2')?myCustomModule.unmountApp('app2'):myCustomModule.mountApp2()">Toggle App2 (x-data)</button>
-        <button class="mui-btn mui-btn--primary" onclick="myCustomModule.isMountedApp('app3')?myCustomModule.unmountApp('app3'):myCustomModule.mountApp3()">Toggle App3 (x-data & x-init)</button>
+        <button class="mui-btn mui-btn--primary" onclick="myCustomModule.isMountedApp('__alpine:app1')?myCustomModule.unmountApp('app1'):myCustomModule.mountApp1()">Toggle App1 </button>
+        <button class="mui-btn mui-btn--primary" onclick="myCustomModule.isMountedApp('__alpine:app2')?myCustomModule.unmountApp('app2'):myCustomModule.mountApp2()">Toggle App2 (x-data)</button>
+        <button class="mui-btn mui-btn--primary" onclick="myCustomModule.isMountedApp('__alpine:app3')?myCustomModule.unmountApp('app3'):myCustomModule.mountApp3()">Toggle App3 (x-data & x-init)</button>
     </div>
     <script>
 window.onload = (event) => {
