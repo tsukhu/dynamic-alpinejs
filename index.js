@@ -15,7 +15,7 @@ function getAppMountElement(htmlId, xData, xInit, props) {
   const { name } = props;
 
   let domElement = document.createElement("div");
-  domElement.id = `__alpine:${name}`;
+  domElement.id = `alpine-${name}`;
   const typeofXData = typeof xData;
 
   if (typeof xData !== "undefined" && xData !== null) {
@@ -42,7 +42,7 @@ function mount({ template, xData, xInit }, props) {
     } else {
       window.xInitFn = { [name]: xInit };
     }
-    domEl = getAppMountElement(name, xData, `xInitFn.${name}('__alpine:${name}')`, {
+    domEl = getAppMountElement(name, xData, `xInitFn.${name}('alpine-${name}')`, {
       ...props,
     });
   } else domEl = getAppMountElement(name, xData, xInit, { ...props });
@@ -62,9 +62,9 @@ module.exports.unmountApp = function unmountApp(id) {
   if (window.hasOwnProperty("xInitFn")) {
     delete window.xInitFn[`${id}`];
   }
-  const domEl = document.getElementById(`__alpine:${id}`);
+  const domEl = document.getElementById(`${id}`);
   if (domEl) {
-    domEl.remove();
+    domEl.innerHTML=""
   }
 };
 
