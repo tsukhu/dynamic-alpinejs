@@ -23,6 +23,13 @@
         <button class="mui-btn mui-btn--primary" onclick="myCustomModule.isMountedApp('app2')?myCustomModule.unmountApp('app2'):myCustomModule.mountApp2()">Toggle App2 (x-data)</button>
         <button class="mui-btn mui-btn--primary" onclick="myCustomModule.isMountedApp('app3')?myCustomModule.unmountApp('app3'):myCustomModule.mountApp3()">Toggle App3 (x-data & x-init)</button>
     </div>
+    <script>
+window.onload = (event) => {
+  console.log('page is fully loaded');
+  myCustomModule.mountApp1();
+  myCustomModule.mountApp2();
+};
+    </script>
     <script src="./index.js"></script>
   </body>
 </html>

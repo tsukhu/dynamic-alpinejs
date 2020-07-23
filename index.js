@@ -6,18 +6,15 @@ function getAppMountElement(htmlId, xData, xInit, props) {
     domElement = document.createElement("div");
     domElement.id = htmlId;
     const typeofXData = typeof xData;
-    console.log(typeofXData);
     if (typeof xData !== "undefined" && xData !== null) {
-      var att = document.createAttribute("x-data"); // Add x-data attribute
-      if (typeofXData === "function") {
-        att.value = JSON.stringify(xData({...props}));
-      } else att.value = JSON.stringify(xData);
-      domElement.setAttributeNode(att);
-
+      const originalData =
+        typeofXData === "function" ? xData({ ...props }) : xData;
+      // merge the opts.xData with the single-spa props
+      const finalData = Object.assign({}, props, originalData);
+      // add x-data attribute
+      domElement.setAttribute("x-data", JSON.stringify(finalData));
       if (typeof xInit === "string" && xInit !== null) {
-        var att2 = document.createAttribute("x-init"); // Add x-init attribute
-        att2.value = xInit;
-        domElement.setAttributeNode(att2);
+        domElement.setAttribute("x-init", xInit);
       }
     }
     document.body.appendChild(domElement);
@@ -25,18 +22,19 @@ function getAppMountElement(htmlId, xData, xInit, props) {
   return domElement;
 }
 
-function mount({ template, xData, xInit },props) {
+function mount({ template, xData, xInit }, props) {
   let domEl;
   const { name } = props;
-  console.log(name);
   if (xInit) {
     if (window.hasOwnProperty("xInitFn")) {
-      window.xInitFn = { ...window.xInitFn, [name]: xInit };
+      window.xInitFn[name] = xInit;
     } else {
       window.xInitFn = { [name]: xInit };
     }
-    domEl = getAppMountElement(name, xData, `xInitFn.${name}('${name}')`, {...props});
-  } else domEl = getAppMountElement(name, xData, xInit, {...props});
+    domEl = getAppMountElement(name, xData, `xInitFn.${name}('${name}')`, {
+      ...props,
+    });
+  } else domEl = getAppMountElement(name, xData, xInit, { ...props });
 
   domEl.innerHTML = template();
 }
@@ -63,10 +61,28 @@ module.exports.unmountApp = function unmountApp(id) {
 function templateApp1() {
   return `
   <div class="mui-panel" x-data="{ open: false }">
-      <div class="mui--test-display1"> Test x-show</div>
+      <div class="mui--test-display1"> Test x-show - App 1</div>
       <button class="mui-btn mui-btn--primary" @click="open = !open">Open/Close</button>
       <div x-show="open" class="mui--text-display4">
           Hey, I'm open
+      </div>
+      <div x-data="{}">
+        Trigger 1
+        <button @click="$dispatch('flash', { level: 'info', msg: 'This is an info message' })" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded m-1">
+          Flash Info
+        </button>
+      </div>
+      <div x-data="{}">
+        Trigger 2
+        <button @click="$dispatch('flash', { level: 'error', msg: 'This is an error message' })" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded m-1">
+          Flash Error
+        </button>
+      </div>
+      <div x-data="{}">
+        Trigger 3
+        <button @click="$dispatch('flash', { level: '', msg: '' })" class="font-bold py-2 px-4 border rounded m-1">
+          Clear Flash
+        </button>
       </div>
   </div>
 `;
@@ -85,10 +101,23 @@ module.exports.mountApp1 = function mountApp1() {
 function templateApp2() {
   return `
   <div class="mui-panel">
-      <div class="mui--test-display1"> Test x-show</div>
+      <div class="mui--test-display1"> Test x-show - App 2</div>
       <button class="mui-btn mui-btn--primary" @click="open = !open">Open/Close</button>
       <div x-show="open" class="mui--text-display4">
           Hey, I'm open
+      </div>
+      <div x-data="{ msg: '', level: '' }">
+        Flash Component
+        <template x-on:flash.window="msg = $event.detail.msg; level = $event.detail.level;"></template>
+        <template x-if="msg && level">
+          <div role="alert" class="mt-2">
+            <div class="text-white font-bold rounded-t px-4 py-2 capitalize" :class="{'bg-red-500': level === 'error', 'bg-blue-500': level === 'info'}" x-text="level">
+            </div>
+            <div class="border border-t-0 rounded-b px-4 py-3" :class="{'bg-red-100 text-red-700 border-red-400': level === 'error', 'bg-blue-100 text-blue-700 border-blue-400': level === 'info'}">
+              <p x-text="msg"></p>
+            </div>
+          </div>
+        </template>
       </div>
   </div>
   `;
