@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Alpine JS API test</title>
-    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <link
+      href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
     <link
       href="//cdn.muicss.com/mui-0.10.3/css/mui.min.css"
       rel="stylesheet"
@@ -19,16 +22,31 @@
   </head>
   <body>
     <div class="mui-container-fluid">
-        <button class="mui-btn mui-btn--primary" onclick="myCustomModule.isMountedApp('alpine-app1')?myCustomModule.unmountApp('app1'):myCustomModule.mountApp1()">Toggle App1 </button>
-        <button class="mui-btn mui-btn--primary" onclick="myCustomModule.isMountedApp('alpine-app2')?myCustomModule.unmountApp('app2'):myCustomModule.mountApp2()">Toggle App2 (x-data)</button>
-        <button class="mui-btn mui-btn--primary" onclick="myCustomModule.isMountedApp('alpine-app3')?myCustomModule.unmountApp('app3'):myCustomModule.mountApp3()">Toggle App3 (x-data & x-init)</button>
+      <button
+        class="mui-btn mui-btn--primary"
+        onclick="myCustomModule.isMountedApp('alpine-app1')?myCustomModule.unmountApp('app1'):myCustomModule.mountApp1()"
+      >
+        Toggle App1
+      </button>
+      <button
+        class="mui-btn mui-btn--primary"
+        onclick="myCustomModule.isMountedApp('alpine-app2')?myCustomModule.unmountApp('app2'):myCustomModule.mountApp2()"
+      >
+        Toggle App2 (x-data)
+      </button>
+      <button
+        class="mui-btn mui-btn--primary"
+        onclick="myCustomModule.isMountedApp('alpine-app3')?myCustomModule.unmountApp('app3'):myCustomModule.mountApp3()"
+      >
+        Toggle App3 (x-data & x-init)
+      </button>
     </div>
     <script>
-window.onload = (event) => {
-  console.log('page is fully loaded');
-//  myCustomModule.mountApp1();
-  myCustomModule.mountApp2();
-};
+      window.onload = (event) => {
+        console.log("page is fully loaded");
+        myCustomModule.mountApp1();
+        myCustomModule.mountApp2();
+      };
     </script>
     <script src="./index.js"></script>
   </body>
