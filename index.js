@@ -12,43 +12,56 @@ function wrap(htmlId, domEl) {
 }
 
 function getAppMountElement(htmlId, xData, xInit, props) {
-  const { name } = props;
-
-  let domElement = document.createElement("div");
-  domElement.id = `alpine-${name}`;
-  const typeofXData = typeof xData;
-
-  if (typeof xData !== "undefined" && xData !== null) {
-    const originalData =
-      typeofXData === "function" ? xData({ ...props }) : xData;
-    // merge the opts.xData with the single-spa props
-    const finalData = Object.assign({}, props, originalData);
-    // add x-data attribute
-    domElement.setAttribute("x-data", JSON.stringify(finalData));
-    if (typeof xInit === "string" && xInit !== null) {
-      domElement.setAttribute("x-init", xInit);
-    }
-  }
-
-  return domElement;
+  return Promise.resolve()
+    .then(() => {
+      if (xData) {
+        return typeof xData === "function"
+          ? xData({ ...props })
+          : xData;
+      } else {
+        return {};
+      }
+    })
+    .then((originalData) => {
+      const { name } = props;
+      const domElement = document.createElement("div");
+      domElement.id = `alpine-${name}`;
+      const finalData = Object.assign({}, props, originalData);
+      domElement.setAttribute("x-data", JSON.stringify(finalData));
+      if (typeof xInit === "string" && xInit !== null) {
+        domElement.setAttribute("x-init", xInit);
+      }
+      return domElement;
+    });
 }
 
 function mount({ template, xData, xInit }, props) {
-  let domEl;
-  const { name } = props;
-  if (xInit) {
-    if (window.hasOwnProperty("xInitFn")) {
-      window.xInitFn[name] = xInit;
-    } else {
-      window.xInitFn = { [name]: xInit };
-    }
-    domEl = getAppMountElement(name, xData, `xInitFn.${name}('alpine-${name}')`, {
-      ...props,
-    });
-  } else domEl = getAppMountElement(name, xData, xInit, { ...props });
-
-  domEl.innerHTML = template();
-  wrap(name, domEl);
+  Promise.resolve().then(() => {
+    let domEl;
+    const { name } = props;
+    if (xInit) {
+      if (window.hasOwnProperty("xInitFn")) {
+        window.xInitFn[name] = xInit;
+      } else {
+        window.xInitFn = { [name]: xInit };
+      }
+      domEl = getAppMountElement(
+        name,
+        xData,
+        `xInitFn.${name}('alpine-${name}')`,
+        {
+          ...props,
+        }
+      );
+    } else domEl = getAppMountElement(name, xData, xInit, { ...props });
+    return domEl;
+  })
+  .then((finalDomEl) => {
+    console.log(finalDomEl);
+    const { name } = props;
+    finalDomEl.innerHTML = template();
+    wrap(name, finalDomEl);
+  });
 }
 
 // check if the app is mounted
@@ -64,7 +77,7 @@ module.exports.unmountApp = function unmountApp(id) {
   }
   const domEl = document.getElementById(`${id}`);
   if (domEl) {
-    domEl.innerHTML=""
+    domEl.innerHTML = "";
   }
 };
 
@@ -135,10 +148,19 @@ function templateApp2() {
   `;
 }
 
+function xDataFn(props) {
+  var promise = new Promise(function (resolve, reject) {
+    /* missing implementation */
+    resolve({ open: false });
+  });
+
+  return promise;
+}
+
 module.exports.mountApp2 = function mountApp2() {
   const opts = {
     template: templateApp2,
-    xData: { open: false },
+    xData: xDataFn,
     xInit: () => console.log("xInit"),
   };
   const props = { name: "app2" };

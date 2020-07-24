@@ -12,5 +12,8 @@
   },
   "dependencies": {
     "alpinejs": "^2.5.0"
-  }
+  },
+  "browserslist": [
+    "last 1 Chrome version"
+  ]
 }
