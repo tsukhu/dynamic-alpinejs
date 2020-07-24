@@ -15,9 +15,7 @@ function getAppMountElement(htmlId, xData, xInit, props) {
   return Promise.resolve()
     .then(() => {
       if (xData) {
-        return typeof xData === "function"
-          ? xData({ ...props })
-          : xData;
+        return typeof xData === "function" ? xData({ ...props }) : xData;
       } else {
         return {};
       }
@@ -36,32 +34,33 @@ function getAppMountElement(htmlId, xData, xInit, props) {
 }
 
 function mount({ template, xData, xInit }, props) {
-  Promise.resolve().then(() => {
-    let domEl;
-    const { name } = props;
-    if (xInit) {
-      if (window.hasOwnProperty("xInitFn")) {
-        window.xInitFn[name] = xInit;
-      } else {
-        window.xInitFn = { [name]: xInit };
-      }
-      domEl = getAppMountElement(
-        name,
-        xData,
-        `xInitFn.${name}('alpine-${name}')`,
-        {
-          ...props,
+  Promise.resolve()
+    .then(() => {
+      let domEl;
+      const { name } = props;
+      if (xInit) {
+        if (window.hasOwnProperty("xInitFn")) {
+          window.xInitFn[name] = xInit;
+        } else {
+          window.xInitFn = { [name]: xInit };
         }
-      );
-    } else domEl = getAppMountElement(name, xData, xInit, { ...props });
-    return domEl;
-  })
-  .then((finalDomEl) => {
-    console.log(finalDomEl);
-    const { name } = props;
-    finalDomEl.innerHTML = template();
-    wrap(name, finalDomEl);
-  });
+        domEl = getAppMountElement(
+          name,
+          xData,
+          `xInitFn.${name}('alpine-${name}')`,
+          {
+            ...props,
+          }
+        );
+      } else domEl = getAppMountElement(name, xData, xInit, { ...props });
+      return domEl;
+    })
+    .then((finalDomEl) => {
+      console.log(finalDomEl);
+      const { name } = props;
+      finalDomEl.innerHTML = template();
+      wrap(name, finalDomEl);
+    });
 }
 
 // check if the app is mounted
@@ -131,11 +130,18 @@ function templateApp2() {
       <div x-show="open" class="mui--text-display4">
           Hey, I'm open
       </div>
-      <div x-data="{ msg: '', level: '' }">
+      <div x-data="{ msg: '', level: '', timeoutId: null }">
         Flash Component
-        <template x-on:flash.window="msg = $event.detail.msg; level = $event.detail.level;"></template>
+        <template x-on:flash.window="msg = $event.detail.msg; level = $event.detail.level; if (timeoutId){clearTimeout(timeoutId);} timeoutId = setTimeout(() => {msg= ''; level= '';},3000)"></template>
         <template x-if="msg && level">
-          <div role="alert" class="mt-2">
+          <div role="alert" class="mt-2"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 transform scale-90"
+            x-transition:enter-end="opacity-100 transform scale-100"
+            x-transition:leave="transition ease-in duration-300"
+            x-transition:leave-start="opacity-100 transform scale-100"
+            x-transition:leave-end="opacity-0 transform scale-90"
+          >
             <div class="text-white font-bold rounded-t px-4 py-2 capitalize" :class="{'bg-red-500': level === 'error', 'bg-blue-500': level === 'info'}" x-text="level">
             </div>
             <div class="border border-t-0 rounded-b px-4 py-3" :class="{'bg-red-100 text-red-700 border-red-400': level === 'error', 'bg-blue-100 text-blue-700 border-blue-400': level === 'info'}">
@@ -150,7 +156,6 @@ function templateApp2() {
 
 function xDataFn(props) {
   var promise = new Promise(function (resolve, reject) {
-    /* missing implementation */
     resolve({ open: false });
   });
 
@@ -217,5 +222,36 @@ module.exports.mountApp3 = function mountApp3() {
     xInit: myFunc,
   };
   const props = { name: "app3", title: "Alpine.js Landing Page" };
+  return mount(opts, props);
+};
+
+// --- APP4 ---
+// Reference :JEFFREY WAY https://gist.github.com/JeffreyWay/0aff02a63ffd87b59b1a343fee7a803d
+
+function templateApp4() {
+  return `
+  <div x-data="{ show: false }" @click.away="show = false" class="mx-2">
+  <button @click="show = ! show" class="font-medium" >Links</button>
+
+  <div class="absolute bg-black text-white py-2 rounded mt-1"
+       x-show="show"
+       x-transition:enter="transition duration-200 transform ease-out"
+       x-transition:enter-start="scale-75"
+       x-transition:leave="transition duration-100 transform ease-in"
+       x-transition:leave-end="opacity-0 scale-90"
+  >
+      <a class="block hover:bg-gray-800 text-xs py-px px-4 hover:no-underline" href="#">Edit</a>
+      <a class="block hover:bg-gray-800 text-xs py-px px-4 hover:no-underline" href="#">Delete</a>
+      <a class="block hover:bg-gray-800 text-xs py-px px-4 hover:no-underline" href="#">Report Spam</a>
+  </div>
+</div>
+    `;
+}
+
+module.exports.mountApp4 = function mountApp4() {
+  const opts = {
+    template: templateApp4,
+  };
+  const props = { name: "app4" };
   return mount(opts, props);
 };
