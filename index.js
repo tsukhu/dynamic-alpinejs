@@ -1,5 +1,9 @@
 import "alpinejs";
 
+function normalizeString(str) {
+  return str.replace(/[^a-z0-9,. ]/gi, '_')
+}
+
 function wrap(htmlId, domEl) {
   // get base
   let domElement = document.getElementById(htmlId);
@@ -40,14 +44,14 @@ function mount({ template, xData, xInit }, props) {
       const { name } = props;
       if (xInit) {
         if (window.hasOwnProperty("xInitFn")) {
-          window.xInitFn[name] = xInit;
+          window.xInitFn[normalizeString(name)] = xInit;
         } else {
-          window.xInitFn = { [name]: xInit };
+          window.xInitFn = { [normalizeString(name)]: xInit };
         }
         domEl = getAppMountElement(
           name,
           xData,
-          `xInitFn.${name}('alpine-${name}')`,
+          `xInitFn.${normalizeString(name)}('alpine-${name}')`,
           {
             ...props,
           }
@@ -72,7 +76,7 @@ module.exports.isMountedApp = function isMounted(id) {
 // unmount the app
 module.exports.unmountApp = function unmountApp(id) {
   if (window.hasOwnProperty("xInitFn")) {
-    delete window.xInitFn[`${id}`];
+    delete window.xInitFn[`${normalizeString(id)}`];
   }
   const domEl = document.getElementById(`${id}`);
   if (domEl) {
@@ -124,10 +128,10 @@ module.exports.mountApp1 = function mountApp1() {
 
 function templateApp2() {
   return `
-  <div class="mui-panel">
-      <div class="mui--test-display1"> Test x-show - App 2</div>
-      <button class="mui-btn mui-btn--primary" @click="open = !open">Open/Close</button>
-      <div x-show="open" class="mui--text-display4">
+  <div class="rounded overflow-hidden shadow-lg font-sans p-1 m-1">
+      <div class="font-bold p-1"> Test x-show - App 2</div>
+      <button class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded" @click="open = !open">Open/Close</button>
+      <div x-show="open" class="text-4xl">
           Hey, I'm open
       </div>
       <div x-data="{ msg: '', level: '', timeoutId: null }">
@@ -221,7 +225,7 @@ module.exports.mountApp3 = function mountApp3() {
     xData: (data) => App3Data(data), // pass props to x-data
     xInit: myFunc,
   };
-  const props = { name: "app3", title: "Alpine.js Landing Page" };
+  const props = { name: "@my/app3", title: "Alpine.js Landing Page" };
   return mount(opts, props);
 };
 
